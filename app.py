@@ -17,11 +17,13 @@ def home():
 
 @app.route('/api/v1/tracks', methods=['GET'])
 def api_all():
-    return jsonify(tracks)
+    # todo return track keys and their dates
+    return jsonify([*tracks])
 
 
 @app.route('/api/v1/gpx', methods=['GET'])
 def api_gpx():
+    # todo idea: split by date. show only track points of today. but allow other api endpoint to provide per day
     name = request.args.get('name', 'default')
     if not name in tracks:
         abort(404)
@@ -55,4 +57,4 @@ def api_upload():
     ))
     return ''
 
-app.run(host='0.0.0.0')
+app.run(host='0.0.0.0', port=5000) # todo hide behind reverse proxy

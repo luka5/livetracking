@@ -12,22 +12,24 @@
         crossorigin=""></script>
 
     <script src="/leaflet-gpx/gpx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.5.1/gpx.min.js"></script>
 
+    <!--   TODO add dropdown with name and date, maybe with angular? -->
     <div id="mapid" style="width: 100%; height: 100%;"></div>
 
     <script>
 
         var map = L.map('mapid').setView([47.311389, 10.355833], 12);
-        
         L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             id: 'mapbox/streets-v11',
             tileSize: 512,
             zoomOffset: -1
         }).addTo(map);
-        
-        var gpxUrl = '/api/v1/gpx';
-        var gpx = new L.GPX(gpxUrl, {
+
+        const trackKey = window.location.search.substring(1) || 'default';
+
+        const gpx = new L.GPX('/api/v1/gpx?name=' + trackKey, {
             async: true,
             marker_options: {
                 startIconUrl: 'leaflet-gpx/pin-icon-start.png',
@@ -37,7 +39,25 @@
         }).on('loaded', function(e) {
             map.fitBounds(e.target.getBounds());
         }).addTo(map);
-        
+
+        /*
+
+                var legend = L.control({position: 'topright'});
+                legend.onAdd = function (map) {
+                    const div = L.DomUtil.create('div', 'info legend');
+                    const options = trackKeys.map(c => "<option>"+c+"</option>").join('')
+                    div.innerHTML = '<select id="tracks">' + options + '</select>';
+                    div.firstChild.onmousedown = div.firstChild.ondblclick = L.DomEvent.stopPropagation;
+                    return div;
+                };
+                legend.addTo(map);
+
+                document.getElementById('tracks').addEventListener('change', function(event){
+                    let name = event.target.value;
+                    gpx._gpx = '/api/v1/gpx?name=' + name;
+                    gpx.reload();
+                });
+        */
         setInterval(function() {
             gpx.reload();
         }, 30000);
