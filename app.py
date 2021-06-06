@@ -6,9 +6,7 @@ from datetime import datetime
 app = Flask(__name__, static_url_path='', static_folder='static')
 app.config["DEBUG"] = True
 
-tracks = {
-    'default': []
-}
+tracks = {}
 
 @app.route('/', methods=['GET'])
 def home():
@@ -17,13 +15,11 @@ def home():
 
 @app.route('/api/v1/tracks', methods=['GET'])
 def api_all():
-    # todo return track keys and their dates
     return jsonify([*tracks])
 
 
 @app.route('/api/v1/gpx', methods=['GET'])
 def api_gpx():
-    # todo idea: split by date. show only track points of today. but allow other api endpoint to provide per day
     name = request.args.get('name', 'default')
     if not name in tracks:
         abort(404)
@@ -43,7 +39,8 @@ def api_gpx():
 
 @app.route('/api/v1/track', methods=['POST'])
 def api_upload():
-    name = request.form.get('name', 'default')
+    time = datetime.fromtimestamp(int(request.form.get('time')))
+    name = request.form.get('name', 'default') + '_' + time.strftime("%Y-%m-%d")
     if name not in tracks:
         tracks[name] = []
 
@@ -51,7 +48,7 @@ def api_upload():
         latitude=request.form.get('lat'),
         longitude=request.form.get('lon'),
         elevation=request.form.get('alt'),
-        time=datetime.fromtimestamp(int(request.form.get('time'))),
+        time=time,
         speed=request.form.get('speed'),
         comment="battery:" + request.form.get('battery') + " gsm_signal:" + request.form.get('gsm_signal')
     ))
