@@ -12,7 +12,6 @@
         crossorigin=""></script>
 
     <script src="/leaflet-gpx/gpx.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.5.1/gpx.min.js"></script>
 
     <!--   TODO add dropdown with name and date, maybe with angular? -->
     <div id="mapid" style="width: 100%; height: 100%;"></div>
@@ -27,41 +26,41 @@
             zoomOffset: -1
         }).addTo(map);
 
-        const trackKey = window.location.search.substring(1) || 'default';
+        var control = L.control.layers(null, null).addTo(map);
 
-        const gpx = new L.GPX('/api/v1/gpx?name=' + trackKey, {
+        function loadTracks() {
+          let xhr = new XMLHttpRequest();
+          xhr.open("GET", "/api/v1/tracks", true);
+          xhr.onload = function() {
+            let tracks = JSON.parse(xhr.response);
+            showTracks(tracks);
+          }
+          xhr.send();
+        }
+
+        function showTracks(tracks) {
+          tracks.forEach(showTrack);
+        }
+
+        function showTrack(trackKey) {
+          const gpx = new L.GPX(`/api/v1/gpx?name=${trackKey}`, {
             async: true,
             marker_options: {
-                startIconUrl: 'leaflet-gpx/pin-icon-start.png',
-                endIconUrl: 'leaflet-gpx/pin-icon-end.png',
-                shadowUrl: 'leaflet-gpx/pin-shadow.png'
+              startIconUrl: 'leaflet-gpx/pin-icon-start.png',
+              endIconUrl: 'leaflet-gpx/pin-icon-end.png',
+              shadowUrl: 'leaflet-gpx/pin-shadow.png'
             }
-        }).on('loaded', function(e) {
+          }).on('loaded', function (e) {
             map.fitBounds(e.target.getBounds());
-        }).addTo(map);
+          }).addTo(map);
+          control.addOverlay(gpx, trackKey);
 
-        /*
-
-                var legend = L.control({position: 'topright'});
-                legend.onAdd = function (map) {
-                    const div = L.DomUtil.create('div', 'info legend');
-                    const options = trackKeys.map(c => "<option>"+c+"</option>").join('')
-                    div.innerHTML = '<select id="tracks">' + options + '</select>';
-                    div.firstChild.onmousedown = div.firstChild.ondblclick = L.DomEvent.stopPropagation;
-                    return div;
-                };
-                legend.addTo(map);
-
-                document.getElementById('tracks').addEventListener('change', function(event){
-                    let name = event.target.value;
-                    gpx._gpx = '/api/v1/gpx?name=' + name;
-                    gpx.reload();
-                });
-        */
-        setInterval(function() {
+          setInterval(function() {
             gpx.reload();
-        }, 30000);
+          }, 30000);
+        }
 
+        loadTracks();
     </script>
 
   </body>
