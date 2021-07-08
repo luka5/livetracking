@@ -33,16 +33,34 @@
           xhr.open("GET", "/api/v1/tracks", true);
           xhr.onload = function() {
             let tracks = JSON.parse(xhr.response);
-            showTracks(tracks);
+            addTracks(tracks);
           }
           xhr.send();
         }
 
-        function showTracks(tracks) {
-          tracks.forEach(showTrack);
+        function addTracks(tracks) {
+          let newestTracks = tracks.sort().reduce((res, t) => {
+            let name = t.split("_")[0];
+            if (!res) {
+              return [t];
+            }
+
+            let previous = res[res.length - 1];
+            if (previous.indexOf(name) !== -1) {
+              res[res.length - 1] = t;
+            } else {
+              res.push(t);
+            }
+            return res;
+
+          }, undefined);
+
+          tracks.forEach((t) => {
+            addTrack(t, newestTracks.indexOf(t) !== -1);
+          });
         }
 
-        function showTrack(trackKey) {
+        function addTrack(trackKey, show) {
           const gpx = new L.GPX(`/api/v1/gpx?name=${trackKey}`, {
             async: true,
             marker_options: {
@@ -52,12 +70,16 @@
             }
           }).on('loaded', function (e) {
             map.fitBounds(e.target.getBounds());
-          }).addTo(map);
+          });
           control.addOverlay(gpx, trackKey);
 
-          setInterval(function() {
-            gpx.reload();
-          }, 30000);
+          if (show) {
+            gpx.addTo(map);
+
+            setInterval(function () {
+              gpx.reload();
+            }, 30000);
+          }
         }
 
         loadTracks();
