@@ -76,8 +76,6 @@
               endIconUrl: 'leaflet-gpx/pin-icon-end.png',
               shadowUrl: 'leaflet-gpx/pin-shadow.png'
             }
-          }).on('loaded', function (e) {
-            map.fitBounds(e.target.getBounds());
           });
           control.addOverlay(gpx, trackKey);
 
@@ -86,6 +84,10 @@
           }
 
           if (active) {
+            gpx.on('loaded', function (e) {
+              map.fitBounds(e.target.getBounds());
+            });
+
             setInterval(function () {
               gpx.reload();
             }, 30000);
