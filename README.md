@@ -1,10 +1,7 @@
 # Locus Map Live Tracking
 
 ## Prepare
-```bash
-cd static
-git clone https://github.com/mpetazzoni/leaflet-gpx
-```
+Clone this repo including the submodule.
 
 ## Run it directly
 ```bash

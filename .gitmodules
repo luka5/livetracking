@@ -1,0 +1,3 @@
+[submodule "static/leaflet-gpx"]
+	path = static/leaflet-gpx
+	url = https://github.com/luka5/leaflet-gpx
